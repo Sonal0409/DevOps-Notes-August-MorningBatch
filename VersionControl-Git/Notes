@@ -1,12 +1,16 @@
+
 1. Become root user:
 
 # sudo su -
 
+2. Install git if on AWS ec2 instance
 
+# yum install git -y
 
 Above command not required on edureka Lab.
 
 3. Create a Local repository using GIT
+==========================================
 
 #  mkdir myproject
 
@@ -24,7 +28,7 @@ A local repository will be created
 
 .git folder will be available, which is your local repository.
 
-
+===========================================
 4. Add the configuration parameters in git, which will later update author and email details in the git commit history
 
 2 variables need to be set
@@ -79,3 +83,303 @@ If we want to Choose a file to be commited
 git commit -m "adding file index1.html" <filename>
 
 ================================================
+
+6. Modify an exisitng tracked files and add those changes to local repo
+====================================================
+
+Take a file which is in local repo
+
+# git ls-files
+
+# vim index1.html
+
+add any data & save the file
+
+# git status
+
+status of file is modified
+
+To add all the modification and commit them to local repo
+
+# git commit -a -m "added modifications"
+
+
+7. If some files are not required to be tracked by GIT --> ignore certain files for version control
+
+=================================================
+
+Git provides the concept of .gitignore, where in we create a file with the name .gitignore
+And we will add names of the files that we dont want to track
+This concept is applicable to files which are new and untracked
+
+# vim .gitignore
+
+In this file insert the name of files to be ingores
+
+press i
+
+*.xml
+*.php
+*.log
+
+:wq
+
+# git status
+
+This concept this applicable to new file(files that are not commited)
+It is only for untracked file.
+
+
+8. How can GIT  ignore changes on tracked files for certian time.
+
+GIT STASHING
+
+============================================
+
+If we have some incomplete work on tracked files, we can stash them in a temporary location and latter we can get them back to working directory
+
+vim index1.html
+
+press i
+
+inster some new data
+
+press esc key
+:wq   and then enter key
+
+# git status ==> you will see modiffied file
+
+# git diff index1.html
+
+Stash the modifications
+
+# git stash
+
+you can see the stash in .git==>refs==>stash folder
+
+# git stash list
+
+stash is saved a n array of index
+
+stash name stash@{0}
+
+see what saved in the stash 
+
+# git show stash@{0}
+
+================================================
+
+19-Apr Notes
+================================================
+
+# sudo su -
+
+# cd myproject
+
+1. Check the log for commit history
+
+# git log
+
+in this HEAD it is an object in git which represents the latest/recent commit id
+
+# git log --oneline
+
+Check commit history of every commit in a single line
+
+# git show <commid id>
+Shows what happened in that commit.
+
+See commits of a particular file:
+
+ git log --graph --all -- index1.html
+
+
+2. Create a feature branch in git  and switch to the branch
+
+========================================
+
+# git branch
+
+Create a new branch
+
+# git branch feature1
+
+Switch to the new branch
+
+# git checkout feature1
+
+[OR]
+
+Create a new branch and switch to the branch also
+
+# git checkout -b feature2
+
+3. Merge the commits/files of new branch to master
+
+Before merging always switch to the destination branch
+
+# git checkout master
+
+# git merge feature1 master
+
+< git merge sourcebranch destinationbranch>
+
+
+Check which branches are merged to master
+
+git branch -a --merged master
+
+Check which branches are not merged to master
+
+git branch -a --no-merged master
+
+
+4. Delete a branch which is not merged with master branch
+
+# git branch -D <branchname>
+
+Delete a branch whose commits have been merged with the master branch
+
+# git branch -d feature1
+
+
+5. Reset the commit history
+
+# git reset --hard <commitid>
+
+here:
+
+commit id is where the HEAD will point to now.
+
+All the other commits above it will be deleted and the chnages will also be deleted from LR and working directory.
+
+It is a destructive command
+
+
+6. Rebase merging strategy in GIT (rewind the commit history)
+
+# git branch
+
+you should be on the master branch
+
+Now create a new branch
+
+# git branch feature1
+
+On the master branch create 2  new commits
+
+example of my log on master branch
+
+8bce083 (HEAD -> master) on master branch 2
+daa1204 on master branch1
+ea61e8e (feature1) added modifications
+0a733ed adding file index1.html
+
+
+Now switch to feature branch and create 2 new commits
+
+
+example of my log on master branch
+
+9981946 (HEAD -> feature1) on branch
+156dc12 done in feature branch
+ea61e8e added modifications
+0a733ed adding file index1.html
+
+
+I want to rebase - re organise the base of my feature branch
+
+Make sure you are on feature branch
+
+# git rebase master
+
+
+The commit history will be as such:
+
+41f5d79 (HEAD -> feature1) on branch
+9469e15 done in feature branch
+8bce083 (master) on master branch 2
+daa1204 on master branch1
+ea61e8e added modifications
+0a733ed adding file index1.html
+
+=================================================
+
+GITHUB:
+
+==================================================
+
+Login to github.com
+
+============================
+
+
+Personal access tokens (classic) function like ordinary OAuth access tokens. They can be used instead of a github password for Git over HTTPS, or can be used to authenticate to the API over Basic Authentication.
+
+1. Create a personal access token:
+
+ > clcik on user menu which is on the extreme right
+ > click on settings in that
+ > scroll down, on left side you will see developer settings -- click on it
+ > on left side 3 rd option --> personla Access token
+ > select tokens(classic)
+ > click on generate new token --> click on generate new token classic
+ > in note --give token name as token19
+ > expiration --> leave as is
+ > select scopes --> clcik on repo checkbox
+ > scroll down and clcik on generate token
+ > the generated token need to be copied safely
+
+Make sure to copy your personal access token now. You won’t be able to see it again!
+
+token:
+
+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
+
+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
+
+
+
+2. Create a remote repository
+
+3. Connect local repo to remote repo
+
+# git checkout master
+
+# git remote add origin https://github.com/Sonal0409/myproject19Apr.git
+
+# git remote -v 
+
+Remove origin if needed
+
+# git remote rm origin
+
+
+Push data from local to remote
+
+# git push origin master
+
+username : github
+password: token
+
+================================
+
+Create a file in github on master branch and pull the file to merge in local repoisotry master branch
+
+
+Once file is created on master branch of remote repo
+
+go to local repo
+
+# git checkout master
+
+# git pull origin master
+
+pull will fecth changes and merge them with LR and WD
+
+================================
+
+
+Clone a remote repository to local machine
+
+# git clone https://github.com/Sonal0409/myproject19Apr.git
