@@ -1,0 +1,189 @@
+Dockerfile
+===================================
+
+FROM ubuntu
+RUN apt-get update
+RUN apt-get install nginx -y
+COPY index.html /var/www/html/
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+
+build dockerfile into an Image
+
+# docker build -t myimage01 .
+
+# docker images
+
+Push the image in docker hub
+==================================
+
+From host machine loginto dockerhub
+
+# docker login
+
+username of dockerhub:
+password
+
+Need to chnage name of the image and add repository name where it has to be pushed in docker hub
+
+docker tag oldimageName dockerhubaccountName/imagename
+
+# docker tag myimage01 sonal04/myimage01
+
+Push the image
+
+# docker push sonal04/myimage01
+
+
+
+=================================
+
+CI/Cd pipeline
+
+Code in github repo
+
+https://github.com/Sonal0409/DevOpsCodeDemo.git
+
+Build the code ==> maven ==> addressbook.war
+
+/var/lib/jenkins/workspace/CICDpipeline/target/addressbook.war
+
+build a docker file
+
+FROM tomcat:9
+COPY addressbook.war /usr/local/tomcat/webapps
+EXPOSE 8080
+CMD  ["catalina.sh", "run"]
+
+Chnage the name of image
+push to dockerhub
+===========================
+
+Create the following pipeline in jenkins
+
+pipeline{
+    tools{
+        maven 'mymaven'
+    }
+    agent any
+    stages{
+        stage('clone repo'){
+            steps{
+                git 'https://github.com/Sonal0409/DevOpsCodeDemo.git'
+            }
+        }
+        stage('Build Code'){
+            steps{
+                sh 'mvn package'
+            }
+        }
+        
+        
+        stage('build Image'){
+          
+            steps{
+                sh 'cp /var/lib/jenkins/workspace/CICDpipeline/target/addressbook.war .'
+                sh 'docker build -t myaddressbook .'
+            }
+        }
+        
+        stage('push Image'){
+            steps{
+
+withCredentials([string(credentialsId: 'DOCKER_HUB_PASWD', variable: 'DOCKER_HUB_PASWD')]) {
+                sh 'docker login -u edu123 -p ${DOCKER_HUB_PASWD}'
+                }
+              
+                sh 'docker tag myaddressbook edu123/myaddressbook'
+                sh 'docker push edu123/myaddressbook'
+            }
+        }
+        
+        stage('Deploy container'){
+            steps{
+                sh 'docker run -d -P edu123/myaddressbook'
+            }
+        }
+    }
+}
+
+
+Before executing the pipleine give jenkins permsision to run docker commands
+ chmod 777 /var/run/docker.sock
+
+===================================================================================
+
+Container Orchestration Tool --> Docker SWARM
+==================================================================================
+
+Orchestration tools --> works in Cluster mode
+
+Cluster --> 2-3 VM with docker installed on them
+
+SWARM cluster ==> multiple docker host with swarm intitiated in it
+
+1. How to create and set a swarm cluster
+
+Take VM1
+
+# docker swarm init
+
+Copy the token and paste on each worker node
+
+docker swarm join --token SWMTKN-1-6957zh43vwr1azic7tpm3gourojw1p367sp555ae5kghrk4pg5-bgtcc8892ddol39s8pb39jn18 172.31.46.73:2377
+
+
+Generate the token if needed
+
+docker swarm join-token worker
+
+# docker node ls
+
+
+2. Create multiple containers (replicas) of an Image and distribute them across the cluster
+
+SERVICE object 
+
+ # docker service create --name svc1 --replicas 4 -p 8282:80 nginx
+
+ # docker service ls
+ 
+ # docker service ps svc1
+
+3. HighAvailability feature of swarm
+
+# docker service ls
+
+# docker service ps svc1
+
+Delete any one the replicas
+
+docker rm -f <containerid>
+
+you will observe that immediatly a new replica has been created.
+
+
+4. Scale up and scale down the replica count for a service
+
+# docker service rm mySvc1
+
+# docker service scale mysvc=4
+
+# docker service scale mysvc=2
+
+Create Service with Volume
+
+docker service create --name myservice --mount type=volume,source=myvolume,target=/mypath --replicas 3 -p 8082:80 nginx
+
+5. Load balacing user requests 
+
+# docker service create --name mysvc --replicas 2 -p 8989:3000 sonal04/samplepyapp:v1
+
+# while true;do curl http://18.188.212.141:8989/;sleep 1;echo " ";done
+
+#  docker service scale mysvc=4
+# docker service ls
+# docker service update --image sonal04/samplepyapp:v2 mysvc
+# docker service rollback mysvc
+
+==================================================================
